@@ -1,1 +1,1 @@
-Test-Connection $ping_address
+ping $ping_address
