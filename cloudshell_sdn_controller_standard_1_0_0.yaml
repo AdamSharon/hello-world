@@ -1,0 +1,127 @@
+# CloudShell SDN Controller Standard 1.0.0
+
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+metadata:
+  template_name: SDN Controller
+  template_author: Quali
+  template_version: 1.0.0
+
+description: SDN controller that manage the l2 fabric
+
+imports:
+  - cloudshell_types: cloudshell_types_1_0_4.yaml
+
+
+node_types:
+
+# ----------------- CLOUDSHELL NODES -----------------#
+  cloudshell.nodes.SDNController:
+    properties:
+      User:
+        description: User with administrative privileges
+        type: string
+        tags: [configuration, setting]
+      Password:
+        type: cloudshell.datatypes.Password
+        tags: [configuration, setting]
+      Model Name:
+        description: The catalog name of the device model. This attribute will be displayed in CloudShell instead of the CloudShell model.
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only, include_in_insight, search_filter]
+      Controller TCP Port:
+        description:
+        type: integer
+        default: 8181
+        tags: [configuration, setting]
+      Scheme:
+        type: string
+        default: HTTP
+        constraints:
+          - valid_values: [HTTP, HTTPS]
+        tags: [configuration, setting]
+      Enable Full Trunk Ports:
+        description: "Optional. in case need to configure a full trunk port (example: ports that private cloud provider are connected to) the ports should be listed in format: openflow:1::eth1;openflow:1:eth2"
+        type: string
+        tags: [configuration, setting]
+      Disable Full Trunk Ports:
+        description: "Optional. in case need to remove a full trunk port configuration the ports should be listed in format: openflow:1::eth1;openflow:1:eth2"
+        type: string
+        tags: [configuration, setting]
+    capabilities:
+      cloudshell_family:
+        type: cloudshell.families.CS_SDNController
+    requirements:
+      - switch:
+            capability: tosca.capabilities.Attachment
+            node: cloudshell.sdn_controller.nodes.GenericSDNSwitch
+            relationship: tosca.relationships.AttachesTo
+            occurrences: [0, UNBOUNDED]
+# ----------------- ------------------ -----------------#
+
+
+
+  cloudshell.sdn_controller.nodes.GenericSDNSwitch:
+    properties:
+      Model Name:
+        description: The catalog name of the device model. This attribute will be displayed in CloudShell instead of the CloudShell model.
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only, include_in_insight, search_filter]
+    capabilities:
+      cloudshell_family:
+        type: cloudshell.families.CS_SDNSwitch 
+    requirements:
+     - ports:
+            capability: tosca.capabilities.Attachment
+            node: cloudshell.sdn_controller.nodes.GenericSDNPort
+            relationship: tosca.relationships.AttachesTo
+            occurrences: [0, UNBOUNDED]
+
+
+  cloudshell.sdn_controller.nodes.GenericSDNPort:
+    properties:
+      MAC Address:
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only]
+      IPv4 Address:
+        type: string
+        tags: [setting, abstract_filter, read_only]
+      IPv6 Address:
+        type: string
+        tags: [setting, abstract_filter, read_only]
+      Model Name:
+        description: The catalog name of the device model. This attribute will be displayed in CloudShell instead of the CloudShell model.
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only, include_in_insight, search_filter]
+      Adjacent:
+        type: string
+        description: The adjacent device (system name) and port, based on LLDP or CDP protocol.
+        tags: [setting, abstract_filter, read_only]
+      Port Description:
+        description: The description of the port as configured in the device.
+        type: string
+        tags: [setting, abstract_filter, read_only]
+    capabilities:
+      cloudshell_family:
+        type: cloudshell.families.CS_Port
+     
+
+
+capability_types:
+  cloudshell.capabilities.AutoDiscovery:
+    derived_from: tosca.capabilities.Root
+    properties:
+      inventory_description:
+        type: string
+        default: ''
+      enable_auto_discovery:
+        type: boolean
+        default: true
+      auto_discovery_description:
+        type: string
+        default: ''
+

@@ -1,0 +1,341 @@
+# CloudShell Broadband Media Standard
+# TOSCA extension: tags for properties with the following values:
+# tags: configuration, setting, search_filter, abstract, include_in_insight, admin_only, display_in_diagram, read_only
+
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+metadata:
+  template_name: Broadband Media Appliance
+  template_author: Quali
+  template_version: 1.0.1
+
+description: Suitable for modeling CloudShell Shells
+
+imports:
+  - cloudshell_types: cloudshell_types_1_0_3.yaml
+
+node_types:
+# ----------------- CLOUDSHELL NODES -----------------#
+  cloudshell.nodes.BroadbandMediaChassis:
+    derived_from:  cloudshell.nodes.Shell
+    properties:
+      Chipset:
+        description: Description of the chipset used by this broadband media appliance
+        type: string
+        tags: [setting, abstract_filter, read_only]
+      Subscriber ID:
+        type: string
+        tags: [setting, abstract_filter, read_only]
+      Account Number:
+        type: string
+        tags: [setting, abstract_filter, read_only]
+    capabilities:
+      cloudshell_family:
+        type: cloudshell.families.CS_BroadbandMediaChassis
+    requirements:
+      - ports:
+            capability: tosca.capabilities.Attachment
+            node: cloudshell.broadband_media.nodes.GenericMediaPort
+            relationship: tosca.relationships.AttachesTo
+            occurrences: [0, UNBOUNDED]
+      - power_ports:
+            capability: tosca.capabilities.Attachment
+            node: cloudshell.resource.nodes.GenericPowerPort
+            relationship: tosca.relationships.AttachesTo
+            occurrences: [0, UNBOUNDED]
+      - wifi_card:
+            capability: tosca.capabilities.Attachment
+            node: cloudshell.broadband_media.nodes.GenericWifiCard
+            relationship: tosca.relationships.AttachesTo
+            occurrences: [0, UNBOUNDED]
+# ----------------- ------------------ -----------------#
+
+
+  cloudshell.broadband_media.nodes.GenericWifiCard:
+    properties:
+      MAC Address:
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only]
+      Chipset:
+        description: Description of the chipset used by this broadband media appliance
+        type: string
+        tags: [setting, abstract_filter, read_only]
+      WiFi Protocol:
+        description: Wi-Fi protocol type (e.g. 802.11n, 802.11ac)
+        type: string
+        tags: [setting, abstract_filter, read_only]
+      Frequency:
+        description: Values can be 2.5 GHz or 5 GHz
+        type: string
+        tags: [setting, abstract_filter, read_only]
+        constraints:
+          - valid_values: [2.5 GHz, 5 GHz]
+    capabilities:
+      cloudshell_family:
+        type: cloudshell.families.CS_WiFiCard
+
+
+  cloudshell.broadband_media.nodes.GenericMediaPort:
+    properties:
+      Media Type:
+        type: string
+        default: 'Ethernet'
+        tags: [setting, abstract_filter, read_only]
+        constraints:
+          - valid_values: [Ethernet, Coax, Phone, Firewire, HDMI]
+      Transport Technology:
+        description: Voice Packet Transmistion Type (e.g. SIP/MGCP)
+        type: string
+        tags: [setting, abstract_filter, read_only]
+      MAC Address:
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only]
+      IPv4 Address:
+        type: string
+        tags: [setting, abstract_filter, read_only]
+      IPv6 Address:
+        type: string
+        tags: [setting, abstract_filter, read_only]
+      Bandwidth:
+        description: The current interface bandwidth, in MB.
+        type: integer
+        tags: [setting, abstract_filter, read_only]
+      Model Name:
+        description: The catalog name of the device model. This attribute will be displayed in CloudShell instead of the CloudShell model.
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only, include_in_insight, search_filter]
+      Class Of Service:
+        description: The current Class (or type) of Service to this device; Programs, Package or Contract names acceptable
+        type: string
+        tags: [setting, abstract_filter, read_only]
+      Public IP:
+        type: string
+        tags: [setting, abstract_filter, read_only]
+      Core Platform:
+        description: The core services platform the port is currently provisioned for.
+        type: string
+        tags: [setting, abstract_filter, read_only]
+      Telephone Number:
+        description: Current phone number assigned to this port, relevant for a phone port.
+        type: string
+        tags: [setting, abstract_filter, read_only]
+    capabilities:
+      cloudshell_family:
+        type: cloudshell.families.CS_Port
+
+
+  cloudshell.nodes.Shell:
+    derived_from: tosca.nodes.Root
+    properties:
+      User:
+        description: User with administrative privileges
+        type: string
+        tags: [configuration]
+      Password:
+        type: cloudshell.datatypes.Password
+        tags: [configuration]
+      Enable Password:
+        description: The enable password is required by some CLI protocols such as Telnet and is required according to the device configuration.
+        type: cloudshell.datatypes.Password
+        tags: [configuration]
+      Power Management:
+        type: boolean
+        default: true
+        description: Used by the power management orchestration, if enabled, to determine whether to automatically manage the device power status. Enabled by default.
+        tags: [configuration]
+      System Name:
+        description: A unique identifier for the device, if exists in the device terminal/os.
+        type: string
+        tags: [setting, abstract_filter, read_only, include_in_insight]
+      Vendor:
+        description: The name of the device manufacture.
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only, include_in_insight]
+      Contact Name:
+        description: The name of a contact registered in the device.
+        type: string
+        tags: [setting, abstract_filter, read_only, include_in_insight]
+      Location:
+        description: The device physical location identifier. For example Lab1/Floor2/Row5/Slot4.
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only, include_in_insight]
+      Model:
+        description: The device model. This information is typically used for abstract resource filtering.
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only, include_in_insight]
+      Model Name:
+        description: The catalog name of the device model. This attribute will be displayed in CloudShell instead of the CloudShell model.
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only, include_in_insight, search_filter]
+      Sessions Concurrency Limit:
+        description: The maximum number of concurrent sessions that the driver will open to the device. Default is 1 (no concurrency).
+        type: integer
+        default: 1
+        tags: [configuration]
+      Version:
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only, include_in_insight]
+      Serial Number:
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only, include_in_insight]
+      OS Version:
+        description: Version of the Operating System.
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only, include_in_insight]
+      TR069 User:
+        type: string
+        tags: [configuration]
+      TR069 Password:
+        type: cloudshell.datatypes.Password
+        tags: [configuration]
+    capabilities:
+      SNMP:
+        type: cloudshell.capabilities.SNMP
+      ConsoleConnection:
+        type: cloudshell.capabilities.ConsoleConnection
+      Backup:
+        type: cloudshell.capabilities.BackUp
+
+  cloudshell.resource.nodes.GenericPowerPort:
+    properties:
+      Model Name:
+        description: The catalog name of the device model. This attribute will be displayed in CloudShell instead of the CloudShell model.
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only, include_in_insight, search_filter]
+      Model:
+        description: The device model. This information is typically used for abstract resource filtering.
+        type: string
+        tags: [setting, abstract_filter, read_only, include_in_insight]
+      Serial Number:
+        type: string
+        tags: [setting, abstract_filter, read_only]
+      Version:
+        description: The firmware version of the resource.
+        type: string
+        tags: [setting, abstract_filter, read_only]
+      Port Description:
+        description: The description of the port as configured in the device.
+        type: string
+        tags: [setting, abstract_filter, read_only]
+    capabilities:
+      cloudshell_family:
+        type: cloudshell.families.CS_PowerPort
+
+
+
+capability_types:
+  cloudshell.capabilities.AutoDiscovery:
+    derived_from: tosca.capabilities.Root
+    properties:
+      inventory_description:
+        type: string
+        default: ''
+      enable_auto_discovery:
+        type: boolean
+        default: true
+      auto_discovery_description:
+        type: string
+        default: ''
+
+  cloudshell.capabilities.SupportConcurrentCommands:
+    derived_from: tosca.capabilities.Root
+
+  cloudshell.capabilities.SNMP:
+    properties:
+      SNMP Read Community:
+        description: The SNMP Read-Only Community String is like a password. It is sent along with each SNMP Get-Request and allows (or denies) access to device.
+        type: cloudshell.datatypes.Password
+        tags: [configuration]
+      SNMP Write Community:
+        description: The SNMP Write Community String is like a password. It is sent along with each SNMP Set-Request and allows (or denies) chaning MIBs values.
+        type: cloudshell.datatypes.Password
+        tags: [configuration]
+      SNMP V3 User:
+        description: Relevant only in case SNMP V3 is in use.
+        type: string
+        tags: [configuration]
+      SNMP V3 Password:
+        description: Relevant only in case SNMP V3 is in use.
+        type: cloudshell.datatypes.Password
+        tags: [configuration]
+      SNMP V3 Private Key:
+        description: Relevant only in case SNMP V3 is in use.
+        type: string
+        tags: [configuration]
+      SNMP Version:
+        type: string
+        default: ''
+        description: The version of SNMP to use. Possible values are v1, v2c and v3.
+        constraints:
+          - valid_values: [ v1, v2c, v3]
+        tags: [configuration]
+      Enable SNMP:
+        description: If set to True and SNMP isn’t enabled yet in the device the Shell will automatically enable SNMP in the device when Autoload command is called. SNMP must be enabled on the device for the Autoload command to run successfully. True by default.
+        type: boolean
+        default: true
+        tags: [configuration]
+      Disable SNMP:
+        description: If set to True SNMP will be disabled automatically by the Shell after the Autoload command execution is completed. False by default.
+        type: boolean
+        default: false
+        tags: [configuration]
+
+  cloudshell.capabilities.ConsoleConnection:
+    properties:
+      Console Server IP Address:
+        description: The IP address of the console server, in IPv4 format.
+        type: string
+        tags: [configuration]
+      Console User:
+        type: string
+        tags: [configuration]
+      Console Port:
+        description: The port on the console server, usually TCP port, which the device is associated with.
+        type: integer
+        tags: [configuration]
+      Console Password:
+        type: cloudshell.datatypes.Password
+        tags: [configuration]
+      CLI Connection Type:
+        type: string
+        description: The CLI connection type that will be used by the driver. Possible values are Auto, Console, SSH, Telnet and TCP. If Auto is selected the driver will choose the available connection type automatically. Default value is Auto.
+        default: Auto
+        constraints:
+          - valid_values: [Auto, Console, SSH, Telnet, TCP]
+        tags: [configuration]
+      CLI TCP Port:
+        description: TCP Port to user for CLI connection. If kept empty a default CLI port will be used based on the chosen protocol, for example Telnet will use port 23.
+        type: integer
+        tags: [configuration]
+
+
+  cloudshell.capabilities.BackUp:
+    properties:
+      Backup Location:
+        description: Used by the save/restore orchestration to determine where backups should be saved.
+        type: string
+        tags: [configuration]
+      Backup Type:
+        description: Supported protocols for saving and restoring of configuration and firmware files. Possible values are 'File System' 'FTP' and 'TFTP'. Default value is 'File System'.
+        type: string
+        default: File System
+        tags: [configuration]
+      Backup User:
+        description: Username for the storage server used for saving and restoring of configuration and firmware files.
+        type: string
+        tags: [configuration]
+      Backup Password:
+        description: Password for the storage server used for saving and restoring of configuration and firmware files.
+        type: cloudshell.datatypes.Password
+        tags: [configuration]

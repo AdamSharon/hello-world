@@ -1,0 +1,96 @@
+# CloudShell Cloud Provider Standard
+# Suitable for creating custom cloud provider shells
+
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+metadata:
+  template_name: Cloud Provider
+  template_author: Quali
+  template_version: 1.0.0
+
+description: Suitable for creating custom cloud providers with one or more deployment options
+
+imports:
+  - cloudshell_types: cloudshell_types_1_2_0.yaml
+
+node_types:
+
+# ----------------- CLOUDSHELL NODES -----------------#
+  cloudshell.nodes.CustomCloudProvider:
+    derived_from:  cloudshell.apps.CloudProvider
+
+  cloudshell.nodes.CustomDeploymentOption:
+    derived_from:  cloudshell.apps.DeploymentOption   
+# ----------------- ------------------ -----------------#
+  
+  cloudshell.apps.CloudProvider:
+    properties:
+      Model Name:
+        description: The catalog name of the device model. This attribute will be displayed in CloudShell instead of the CloudShell model.
+        type: string
+        default: ''
+      Networking type:
+        description: networking type that the cloud provider implements- L2 networking (VLANs) or L3 (Subnets) 
+        type: string
+        constraints:
+          - valid_values: [L2, L3] 
+      Execution Server Selector:
+        description: Execution server group that this shell will run on.
+        type: string
+        default: '' 
+      Region:
+        description: The public cloud region to be used by this cloud provider. 
+        type: string
+        default: ''
+      Networks in use:
+        description: Reserved network ranges to be excluded when allocated sandbox networks (for cloud providers with L3 networking). The syntax is a comma separated CIDR list. For example "10.0.0.0/24, 10.1.0.0/26"
+        type: string
+        default: '' 
+      VLAN Type:
+        description: whether to use VLAN or VXLAN (for cloud providers with L2 networking)
+        type: string
+        default: 'VLAN'
+        constraints:
+          - valid_values: [VLAN, VXLAN]
+    requirements:
+      - Deployment:
+            capability: tosca.capabilities.Attachment
+            node: cloudshell.nodes.CustomDeploymentOption
+            relationship: tosca.relationships.AttachesTo
+            occurrences: [1, UNBOUNDED]
+    capabilities:
+      cloudshell_family:
+        type: cloudshell.families.CS_CloudProvider          
+       
+       
+  cloudshell.apps.DeploymentOption:
+    properties:
+      Model Name:
+        description: The catalog name of the device model. This attribute will be displayed in CloudShell instead of the CloudShell model.
+        type: string
+        default: true
+      Autoload:
+        description: Whether to call the autoload command during Sandbox setup 
+        type: boolean
+        default: true
+      Wait for IP:
+        description: if set to false the deployment will not wait for the VM to get an IP address 
+        type: boolean
+        default: true
+    capabilities:
+      cloudshell_family:
+        type: cloudshell.families.CS_DeploymentOptions
+   
+capability_types:
+  cloudshell.capabilities.AutoDiscovery:
+    derived_from: tosca.capabilities.Root
+    properties:
+      inventory_description:
+        type: string
+        default: ''
+      enable_auto_discovery:
+        type: boolean
+        default: true
+      auto_discovery_description:
+        type: string
+        default: ''

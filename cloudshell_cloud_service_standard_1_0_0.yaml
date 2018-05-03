@@ -1,0 +1,57 @@
+# CloudShell Cloud Service Standard
+# TOSCA extension: tags for properties with the following values:
+# tags: configuration, setting, search_filter, abstract, include_in_insight, admin_only, display_in_diagram, read_only, user_input (only service shells)
+
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+metadata:
+  template_name: Cloud Service
+  template_author: Quali
+  template_version: 1.0.0
+
+description: Suitable for modeling CloudShell Shells
+
+imports:
+  - cloudshell_types: cloudshell_types_1_1_0.yaml
+
+
+node_types:
+
+# ----------------- CLOUDSHELL NODES -----------------#
+  cloudshell.nodes.CloudService:
+    derived_from:  cloudshell.nodes.Shell
+    capabilities:
+      cloudshell_family:
+        type: cloudshell.families.CS_CloudService
+# ----------------- ------------------ -----------------#
+
+
+  cloudshell.nodes.Shell:
+    derived_from: tosca.nodes.Root
+    properties:
+      User:
+        description: User with administrative privileges
+        type: string
+        tags: [user_input]
+      Password:
+        type: cloudshell.datatypes.Password
+        tags: [user_input]
+      Address:
+        description: Address for remote access
+        type: string
+        tags: [user_input]
+      Cloud Provider:
+        description: Cloud provider resource name
+        type: string
+        tags: [user_input]
+      Service Categories:
+        description: A list of categories.
+        type: list
+        default: [Cloud Services]
+
+data_types:
+  cloudshell.datatypes.Password:
+    derived_from: tosca.datatypes.Root
+    properties:
+      text:
+        type: string

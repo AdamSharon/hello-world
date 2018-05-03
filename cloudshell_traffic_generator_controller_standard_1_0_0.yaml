@@ -1,0 +1,61 @@
+# CloudShell Traffic Generator Controller Standard
+# TOSCA extension: tags for properties with the following values:
+# tags: configuration, setting, search_filter, abstract, include_in_insight, admin_only, display_in_diagram, read_only, user_input (only service shells)
+
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+metadata:
+  template_name: Traffic Generator Controller
+  template_author: Quali
+  template_version: 1.0.0
+
+description: Suitable for modeling CloudShell Shells
+
+imports:
+  - cloudshell_types: cloudshell_types_1_1_0.yaml
+
+
+node_types:
+
+# ----------------- CLOUDSHELL NODES -----------------#
+  cloudshell.nodes.TrafficGeneratorController:
+    derived_from:  cloudshell.nodes.Shell
+    capabilities:
+      cloudshell_family:
+        type: cloudshell.families.CS_TrafficGeneratorController
+# ----------------- ------------------ -----------------#
+
+
+  cloudshell.nodes.Shell:
+    derived_from: tosca.nodes.Root
+    properties:
+      User:
+        description: User with administrative privileges
+        type: string
+        tags: [user_input]
+      Password:
+        type: cloudshell.datatypes.Password
+        tags: [user_input]
+      Address:
+        description: Address for remote access
+        type: string
+        tags: [user_input]
+      Client Install Path:
+        description: The path in which the traffic client is installed on the Execution Server. For example &quot;C:/Program Files (x86)/Ixia/IxLoad/5.10-GA&quot;.
+        type: string
+        tags: [user_input]
+      Server TCP Port:
+        description: The TCP port of the traffic server. Relevant only in case an external server is configured. Default TCP port should be used if kept empty.
+        type: string
+        tags: [user_input]
+      Service Categories:
+        description: A list of categories.
+        type: list
+        default: [Traffic Generator Controllers]
+
+data_types:
+  cloudshell.datatypes.Password:
+    derived_from: tosca.datatypes.Root
+    properties:
+      text:
+        type: string

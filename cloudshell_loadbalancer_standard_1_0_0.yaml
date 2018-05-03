@@ -1,0 +1,273 @@
+# CloudShell Load Balancer Standard
+# Suitable for modeling Load Balancer devices
+# More Info: 
+
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+metadata:
+  template_name: LoadBalancer
+  template_author: Quali
+  template_version: 1.0.0
+
+description: Suitable for modeling Load Balancer devices
+
+imports:
+  - cloudshell_standard: cloudshell_resource_standard_2_0_3.yaml
+  - cloudshell_types: cloudshell_types_1_1_1.yaml
+
+node_types:
+
+# ----------------- CLOUDSHELL NODES -----------------#
+  cloudshell.nodes.LoadBalancer:
+    derived_from:  cloudshell.loadbalancer.LoadBalancerDevice
+    capabilities:
+      cloudshell_family:
+        type: cloudshell.families.CS_LoadBalancer
+
+# ----------------- ------------------ -----------------#
+
+  cloudshell.loadbalancer.LoadBalancerDevice:
+    derived_from: cloudshell.nodes.Shell
+    properties:
+      OS Version:
+        description: Version of the Operating System.
+        type: string
+        tags: [setting, abstract_filter, read_only]
+      VRF Management Name:
+        description: The default VRF Management to use if configured in the network and no such input was passed to the Save or Restore command.
+        type: string
+        tags: [configuration]
+    requirements:
+      - Chassis:
+            capability: tosca.capabilities.Attachment
+            node: cloudshell.loadbalancer.GenericChassis
+            relationship: tosca.relationships.AttachesTo
+            occurrences: [0, UNBOUNDED]
+      - Port Channels:
+            capability: tosca.capabilities.Attachment
+            node: cloudshell.loadbalancer.nodes.GenericPortChannel
+            relationship: tosca.relationships.AttachesTo
+            occurrences: [0, UNBOUNDED]
+      - Server Farm:
+            capability: tosca.capabilities.Attachment
+            node: cloudshell.loadbalancer.GenericServerFarm
+            relationship: tosca.relationships.AttachesTo
+            occurrences: [0, UNBOUNDED]
+
+  cloudshell.loadbalancer.GenericServerFarm:
+    properties:
+      Algorithm:
+        description: The Algorithm used in this farm for balancing traffic.
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only, include_in_insight, search_filter]
+      Virtual Server Address:
+        description: The Virual server address may be a url or an IP. 
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only]
+      Virtual Server Port:
+        description: The virtual server port number (either TCP or UDP).
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only]
+    capabilities:
+      cloudshell_family:
+        type: cloudshell.families.CS_ServerFarm
+    requirements:
+      - real_server:
+            capability: tosca.capabilities.Attachment
+            node: cloudshell.loadbalancer.GenericRealServer
+            relationship: tosca.relationships.AttachesTo
+            occurrences: [0, UNBOUNDED]
+
+  cloudshell.loadbalancer.GenericRealServer:
+    properties:
+      Server Address:
+        description: The real server address may be a url or an IP..
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only, include_in_insight]
+    capabilities:
+      cloudshell_family:
+        type: cloudshell.families.CS_RealServer
+
+  cloudshell.loadbalancer.GenericChassis:
+    properties:
+      Model:
+        description: The device model. This information is typically used for abstract resource filtering.
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only, include_in_insight]
+      Model Name:
+        description: The catalog name of the device model. This attribute will be displayed in CloudShell instead of the CloudShell model.
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only, include_in_insight, search_filter]
+      Serial Number:
+        type: string
+        tags: [setting, abstract_filter, read_only]
+    requirements:
+      - modules:
+            capability: tosca.capabilities.Attachment
+            node: cloudshell.loadbalancer.nodes.GenericModule
+            relationship: tosca.relationships.AttachesTo
+            occurrences: [0, UNBOUNDED]
+      - ports:
+            capability: tosca.capabilities.Attachment
+            node: cloudshell.loadbalancer.nodes.GenericPort
+            relationship: tosca.relationships.AttachesTo
+            occurrences: [0, UNBOUNDED]
+      - power_ports:
+            capability: tosca.capabilities.Attachment
+            node: cloudshell.resource.nodes.GenericPowerPort
+            relationship: tosca.relationships.AttachesTo
+            occurrences: [0, UNBOUNDED]
+    capabilities:
+      cloudshell_family:
+        type: cloudshell.families.CS_Chassis
+
+  cloudshell.loadbalancer.nodes.GenericModule:
+    properties:
+      Model:
+        description: The device model. This information is typically used for abstract resource filtering.
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only, include_in_insight]
+      Model Name:
+        description: The catalog name of the device model. This attribute will be displayed in CloudShell instead of the CloudShell model.
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only, include_in_insight, search_filter]
+      Version:
+        description: The firmware version of the resource.
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only]
+      Serial Number:
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only]
+    requirements:
+      - sub_modules:
+            capability: tosca.capabilities.Attachment
+            node: cloudshell.loadbalancer.nodes.GenericSubModule
+            relationship: tosca.relationships.AttachesTo
+            occurrences: [0, UNBOUNDED]
+      - ports:
+            capability: tosca.capabilities.Attachment
+            node: cloudshell.loadbalancer.nodes.GenericPort
+            relationship: tosca.relationships.AttachesTo
+            occurrences: [0, UNBOUNDED]
+    capabilities:
+      cloudshell_family:
+        type: cloudshell.families.CS_Module
+
+  cloudshell.loadbalancer.nodes.GenericSubModule:
+    properties:
+      Model:
+        description: The device model. This information is typically used for abstract resource filtering.
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only, include_in_insight]
+      Model Name:
+        description: The catalog name of the device model. This attribute will be displayed in CloudShell instead of the CloudShell model.
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only, include_in_insight, search_filter]
+      Version:
+        description: The firmware version of the resource.
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only]
+      Serial Number:
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only]
+    requirements:
+      - ports:
+          capability: tosca.capabilities.Attachment
+          node: cloudshell.loadbalancer.nodes.GenericPort
+          relationship: tosca.relationships.AttachesTo
+          occurrences: [0, UNBOUNDED]
+    capabilities:
+      cloudshell_family:
+        type: cloudshell.families.CS_SubModule
+
+  cloudshell.loadbalancer.nodes.GenericPort:
+    properties:
+      MAC Address:
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only]
+      L2 Protocol Type:
+        description: The L2 protocol type configured on the interface. For example POS, Serial.
+        type: string
+        description: Such as POS, Serial
+        tags: [setting, abstract_filter, read_only]
+      IPv4 Address:
+        type: string
+        tags: [setting, abstract_filter, read_only]
+      IPv6 Address:
+        type: string
+        tags: [setting, abstract_filter, read_only]
+      Port Description:
+        description: The description of the port as configured in the device.
+        type: string
+        tags: [setting, abstract_filter, read_only]
+      Bandwidth:
+        description: The current interface bandwidth, in MB.
+        type: integer
+        tags: [setting, abstract_filter, read_only]
+      MTU:
+        description: The current MTU configured on the interface.
+        type: integer
+        tags: [setting, abstract_filter, read_only]
+      Duplex:
+        description: The current duplex configuration on the interface. Possible values are Half or Full.
+        type: string
+        default: Half
+        constraints:
+          - valid_values: [Half, Full]
+        tags: [setting, abstract_filter, read_only]
+      Adjacent:
+        type: string
+        description: The adjacent device (system name) and port, based on LLDP or CDP protocol.
+        tags: [setting, abstract_filter, read_only]
+      Auto Negotiation:
+        type: boolean
+        description: The current auto negotiation configuration on the interface.
+        tags: [setting, abstract_filter, read_only]
+      Model Name:
+        description: The catalog name of the device model. This attribute will be displayed in CloudShell instead of the CloudShell model.
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only, include_in_insight, search_filter]
+    capabilities:
+      cloudshell_family:
+        type: cloudshell.families.CS_Port
+
+  cloudshell.loadbalancer.nodes.GenericPortChannel:
+    properties:
+      Associated Ports:
+        type: string
+        description: Ports associated with this port channel. The value is in the format “[portResourceName],…”, for example “GE0-0-0-1,GE0-0-0-2”
+        tags: [setting, abstract_filter, read_only]
+      IPv4 Address:
+        type: string
+        tags: [setting, abstract_filter, read_only]
+      IPv6 Address:
+        type: string
+        tags: [setting, abstract_filter, read_only]
+      Port Description:
+        description: The description of the port as configured in the device.
+        type: string
+        tags: [setting, abstract_filter, read_only]
+      Model Name:
+        description: The catalog name of the device model. This attribute will be displayed in CloudShell instead of the CloudShell model.
+        type: string
+        default: ''
+        tags: [setting, abstract_filter, read_only, include_in_insight, search_filter]
+    capabilities:
+      cloudshell_family:
+        type: cloudshell.families.CS_PortChannel
